@@ -25,3 +25,40 @@
 @media(max-width:760px){.chapter-dock .chapter-name{display:none}.chapter-dock button{padding:12px 7px;justify-content:center;min-width:27px;flex:1}.chapter-dock{gap:0;padding:4px}.scene-tag{display:none}.tour-footer{gap:8px}.editorial h1{font-size:clamp(55px,14.5vw,90px)}.scene-caption{letter-spacing:1.1px}.scene-caption button{font-size:8px}.footer-actions>.icon-button{min-width:30px;min-height:30px}}
 @media(max-width:360px){.chapter-dock button{padding:12px 4px;min-width:24px}.editorial h1{font-size:14vw}.hero-actions{gap:14px}.hero-actions .button{gap:18px}}
 @media(max-height:700px) and (max-width:760px){.editorial{top:43%}.editorial h1{font-size:clamp(45px,12vw,65px);margin:17px 0}.editorial>p{margin:15px 0;font-size:11px}.hero-footnote{display:none}.scroll-cue{display:none}}
+
+/* A spatial title sequence, then alternating editorial compositions. */
+.wordmark img{display:block;width:115px;height:43px;object-fit:contain}
+.cinematic-copy{position:fixed;z-index:3;left:50%;bottom:20%;transform:translateX(-50%);width:min(600px,86vw);text-align:center;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .7s,visibility .7s}
+.cinematic-copy .eyebrow{justify-content:center;font-size:8px;letter-spacing:4px;color:#b2cdbc}
+.cinematic-copy h2{font:500 clamp(35px,4vw,60px)/1.1 'Barlow Condensed',sans-serif;letter-spacing:1px;margin:16px 0 10px}
+.cinematic-copy p{font-size:11px;line-height:1.8;color:#9db8a8;margin:0 0 15px}
+.cinematic-copy button{pointer-events:auto;color:#cfe7d7;font-size:10px;letter-spacing:1px}
+.cinematic-mode .cinematic-copy{opacity:var(--cinema-fade,1);visibility:visible}
+.cinematic-mode .editorial,.cinematic-mode .scene-tag{opacity:0;visibility:hidden;pointer-events:none}
+.cinematic-mode .editorial button{pointer-events:none}
+.cinematic-mode .scene-caption{opacity:0;pointer-events:none}
+.cinematic-mode .world-shade{background:linear-gradient(0deg,#04120fd9,transparent 45%,transparent 80%,#04120f55)}
+.cinematic-mode .chapter-dock .chapter-name{display:none}
+.editorial,.scene-tag{transition:opacity .65s,visibility .65s}
+body[data-layout=right] .editorial{left:auto;right:6%}
+body[data-layout=right] .world-shade{background:linear-gradient(270deg,#04120ff5 0%,#04120fdf 20%,#04120f8c 40%,#04120f08 70%),linear-gradient(0deg,#04120fc9,transparent 23%,transparent 80%,#04120f8a)}
+body[data-layout=right] .scene-tag{right:auto;left:4.5%;text-align:left}
+body[data-layout=right] .scene-tag .tag-rule{margin-left:0;margin-right:auto}
+body[data-layout=right] .scene-tag button{margin-left:0;margin-right:auto}
+body[data-layout=right] .scene-caption{right:auto;left:4.4%}
+.chapter-dock{max-width:62vw;overflow-x:auto;scrollbar-width:none;flex-shrink:1;justify-content:flex-start}
+.chapter-dock::-webkit-scrollbar{display:none}
+.chapter-dock button{flex:0 0 auto;padding:11px 8px;min-height:40px}
+.scene-caption{transition:opacity .6s}
+@media(max-width:1100px){.chapter-dock button{padding:11px 7px}.scroll-cue>span:last-child{display:none}.chapter-dock{max-width:72vw}}
+@media(max-width:760px){.wordmark img{width:96px;height:36px}.cinematic-copy{bottom:22%;width:86vw}.cinematic-copy h2{font-size:35px}.cinematic-copy p{font-size:10px}.cinematic-copy .eyebrow{font-size:7px;letter-spacing:2px}.chapter-dock{max-width:none;min-width:0;flex:1;width:0}.chapter-dock button{flex:0 0 27px;min-width:27px;padding:11px 4px}.chapter-dock .chapter-name{display:none}body[data-layout=right] .editorial{left:auto;right:7%;text-align:right}body[data-layout=right] .editorial .eyebrow,body[data-layout=right] .hero-actions,body[data-layout=right] .hero-footnote{justify-content:flex-end}body[data-layout=right] .editorial>p{margin-left:auto}body[data-layout=right] .world-shade{background:linear-gradient(270deg,#04120fe8,#04120f98 55%,#04120f40),linear-gradient(0deg,#04120ff5,transparent 25%,transparent 80%,#04120f99)}body[data-layout=right] .scene-caption{left:7%}}
+
+/* Forest-green liquid glass information panels. */
+dialog{background:linear-gradient(135deg,#163d2a99,#061e16c9 45%,#0b2b1fba);backdrop-filter:blur(30px) saturate(135%);-webkit-backdrop-filter:blur(30px) saturate(135%);border-left:1px solid #bbf8d542;box-shadow:inset 1px 0 0 #e7ffed1c,inset 0 1px 0 #e7ffed29,-30px 0 100px #0006}
+dialog::backdrop{background:#010b084a;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+dialog:before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 0 0,#dbffe616,transparent 52%),linear-gradient(115deg,#edfff509,transparent 35%,#c8ffdf05 66%,transparent);z-index:0}
+.panel-head,#panel-content{position:relative;z-index:1}.panel-head{background:#0622173b;border-bottom-color:#c2f9d929}
+.service-item,.process-row,.directory{border-color:#c2f9d927}
+dialog input,dialog select,dialog textarea{background:#03170ed6;border-color:#89bd9b42}
+dialog .success-card,dialog .record-form{background:#082b1ca6;border-color:#86cda54d}
+@media(max-width:760px){dialog{background:linear-gradient(135deg,#123b2be6,#061e16eb);backdrop-filter:blur(22px) saturate(125%);-webkit-backdrop-filter:blur(22px) saturate(125%)}.cinematic-copy{bottom:17%}}

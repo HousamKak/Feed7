@@ -1,6 +1,6 @@
 # FEED7 / The virtual growth studio
 
-A custom, real-time emerald studio with nine cinematic camera stops, curved dolly transitions, a kinetic gallery, recording and digital-production zones, animated wall screens, an orbital light sculpture, and a reflective architectural floor. The supplied palette and agency brief are preserved in `src/content.js`.
+A custom, real-time emerald studio with thirteen camera stops with a supplied-logo opening, circuit-road transition, studio assembly, and logo return, curved dolly transitions, a kinetic gallery, recording and digital-production zones, animated wall screens, an orbital light sculpture, and a reflective architectural floor. The supplied palette and agency brief are preserved in `src/content.js`.
 
 ## Public studio and GitHub Pages
 
@@ -25,7 +25,7 @@ Four original assets were generated with the built-in image generation tool. Ful
 
 The studio includes separate kinetic installations: an instanced chrome ribbon installation, a lounge mobile, a procedural waveform wall, moving glass fins, floating data particles, traveling light accents, a gently floating dimensional 7, and the overhead orbital sculpture. Ambient pause freezes the scene; reduced motion removes ambient movement. No audio input is accessed.
 
-Static furniture and plants are merged by material, shadows are cached, floor reflection renders at a lower resolution and cadence, and monitor textures update at a reduced rate. The renderer adapts its internal resolution on slower devices and stops drawing while a modal, hidden tab, paused scene, or reduced-motion idle view needs no updates. In a controlled local headless Chromium comparison at 1280×800 DPR 1, observed animation cadence improved from approximately 15 fps to 60 fps; performance varies by hardware. The measurements are saved in [`docs/performance.json`](docs/performance.json).
+Static furniture and plants are merged by material, shadows are cached, floor reflection renders at a lower resolution and cadence, and monitor textures update at a reduced rate. The renderer uses a device-pixel-ratio cap of 1.75, multisample edge smoothing, and a restrained adaptive resolution floor of 85% on slower devices and stops drawing while a modal, hidden tab, paused scene, or reduced-motion idle view needs no updates. In a controlled local headless Chromium comparison at 1280×800 DPR 1, observed animation cadence improved from approximately 15 fps to 60 fps; performance varies by hardware. The measurements are saved in [`docs/performance.json`](docs/performance.json).
 
 ## Run locally
 
@@ -48,7 +48,7 @@ npm start
 
 ## Experience
 
-- Nine chapters, controlled by native page scrolling, chapter navigation, or left/right arrow keys. The "Look around" control lets visitors drag and zoom through the studio with the editorial layer hidden.
+- Thirteen chapters, controlled by native page scrolling, chapter navigation, or left/right arrow keys. The "Look around" control lets visitors drag and zoom through the studio with the editorial layer hidden.
 - Custom studio architecture in `src/studio.js`; camera route in `src/camera-tour.js`. The Blockforge project at `D:/dev/block game` and its studio export/viewpoints were inspected as reference. This FEED7 space is a new authored environment with a working Blockforge export: `studio/feed7.save.json`, the editable build plan `studio/feed7.plan.json`, and `studio/camera-route.json`. The export was applied and independently reloaded through Blockforge's actual World, BuildExecutor, and Serializer. Its 102 meshes and 534,666 triangles are recorded in `studio/manifest.json`. The architectural meshes come from the web studio; canvas signage becomes vertex color, while animated screens, transparent glass, and mirror effects keep their richer web rendering.
 - Detailed services, search, concept portfolio, about, FAQ, privacy, terms, and WhatsApp contact.
 - Validated project briefs stored in SQLite. Every request receives a private bearer-link portal for status and team updates. Treat these links as confidential. They are not email-delivered; the visitor must save the link shown after submission.
@@ -64,3 +64,11 @@ The client portal intentionally provides request tracking now; invoicing, file c
 ## Blockforge authoring
 
 Import `studio/feed7.save.json` into Blockforge to work with the studio geometry. To regenerate from the web scene, keep `npm run dev` running, set `BLOCKFORGE_ROOT` to your Blockforge checkout (defaults to `D:/dev/block game`), and run `npm run studio:export`. If Playwright's default browser is not installed, set `CHROME_EXECUTABLE` to an existing Chromium/Chrome binary. The exporter writes only inside this project's `studio/` directory; it does not alter the Blockforge checkout. The export is one-way: native edits are not automatically reflected back into the website's procedural source.
+
+## Current visual revision
+
+The supplied `logo1.jpg` and `logo2.jpg` are preserved in `assets/brand-source/`. Smooth vector geometry drives the opening mark, road transition, and closing loop. The dimensional 7 stays in the centre of the studio. Studio copy alternates sides with corresponding camera framing. Right-hand information panels use translucent forest-green glass.
+
+`public/blockforge/` contains four verified CC0 material scans and a studio HDRI, imported through Blockforge's real material compiler by `scripts/import-blockforge-materials.mjs`. The materials manifest records source licences, URLs, and hashes. The interactive site remains a Three.js render. This material and lighting revision is not a finished photoreal or path-traced result.
+
+The native snapshot in `studio/` is the earlier nine-stop export; it is retained as a verified baseline while the new sequence and photoreal pipeline are developed.
