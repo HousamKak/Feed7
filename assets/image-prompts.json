@@ -1,0 +1,22 @@
+{
+  "generator": "Built-in image_gen",
+  "created": "2026-11-10",
+  "assets": [
+    {
+      "key": "emerald-signal",
+      "prompt": "Use case: stylized-concept. Asset type: premium digital agency studio wall artwork, landscape 3:2. Create a breathtaking high-end CGI abstract sculpture: one flowing polished liquid-chrome ribbon folds into an impossible orbital knot, suspended above a deep forest-green basalt plinth, dramatic emerald caustics and restrained soft ivory highlights, pitch-dark forest backdrop #061814. Rich physically realistic brushed metal, translucent emerald glass accents, subtle atmospheric haze, luxurious contemporary art-gallery campaign photography, close architectural composition, crisp refined detail. Palette deep forest #061814, dark emerald #053828, emerald #096646, vibrant green #18A775, off-white #F6F7F4. The sculpture fills the center with negative space around it; no typography, no letters, no logos, no watermark. This is an actual image asset for screens and framed artwork inside an immersive FEED7 studio, not a website mockup."
+    },
+    {
+      "key": "production-detail",
+      "prompt": "Use case: photorealistic-natural. Asset type: editorial studio production photograph, landscape 3:2. An extraordinarily beautiful close-up of a professional matte-black broadcast microphone on an articulated boom arm with brass hardware, in a premium dark forest-green recording studio. A softly blurred cinema camera lens in foreground and acoustic fabric panels in background, warm ivory practical light with an emerald rim light, realistic woven microphone grille, shallow depth of field, tactile materials, luxury editorial photography, filmic contrast, naturally controlled highlights, no people. Deep forest #061814 and emerald #096646 color identity with muted warm metal. No branding, no letters, no text, no watermark. Compose microphone slightly right of center, usable clean negative space left. Must look like a sophisticated real studio production photo, not a neon gaming room."
+    },
+    {
+      "key": "basalt-floor",
+      "prompt": "Use case: photorealistic-natural. Asset type: seamless tileable PBR base-color material texture, square. Straight-down orthographic scan of very dark forest-green honed basalt stone, refined fine mineral grain, extremely subtle muted emerald-grey cloudy variation, microscopic pores, luxurious architectural floor finish. Seamlessly repeating left/right/top/bottom edges, homogeneous even lighting, flat albedo only: no directional light, no cast shadows, no reflections, no specular highlights, no bevels, no tile grout, no borders, no objects, no perspective, no text. Mostly very dark desaturated green #101e19 with fine grey mineral detail. Realistic material texture to wrap a real-time 3D studio floor; fine scale, restrained variation, no large cracks, no marble veins."
+    },
+    {
+      "key": "emerald-acoustic",
+      "prompt": "Use case: photorealistic-natural. Asset type: seamless tileable PBR base-color material texture, square. Orthographic macro material scan of premium deep emerald-green woven acoustic upholstery fabric, small dense interlaced threads, subtle irregular textile fibers, refined wool-linen weave with excellent tactile detail. Flat and perfectly even color illumination, no highlights, no baked shadows, no folds, no seams, no borders, no objects, no perspective, no typography. Tile seamlessly on all four edges. Base palette deep forest emerald #10402e with tiny subdued green and charcoal thread variations. Intended as a physically plausible upholstery and acoustic wall panel material in a premium architecture visualization; restrained, sophisticated, not patterned wallpaper."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+data/
+.env
+test-results/
+artifacts/
+dist-pages/
+prompt.txt
+photo_*.jpg

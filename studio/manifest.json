@@ -1,0 +1,32 @@
+{
+  "format": "feed7-studio/1",
+  "name": "FEED7 / Emerald Growth Studio",
+  "blocksPerMetre": 20,
+  "meshCount": 86,
+  "triangleCount": 422632,
+  "verifiedBy": "Blockforge World + BuildExecutor + Serializer deserialize",
+  "source": {
+    "file": "src/studio.js",
+    "sha256": "24df8bbe40081688d2528b0606193e510277253acfed09b1d3a0752a38887818"
+  },
+  "outputs": [
+    {
+      "file": "feed7.save.json",
+      "sha256": "5e51d2fd5a5c7cc294eea4cae81a438ecfcafd567365999b6f08984903c1240f"
+    },
+    {
+      "file": "feed7.plan.json",
+      "sha256": "d2eb4402791ba576934277d12b94ca00ff9baaaaad1411afe5dbe807dfdda0ec"
+    },
+    {
+      "file": "camera-route.json",
+      "sha256": "28e53c21bcdd72e01f86f9aa0db6c4204b42dc16561be13b2a4e3bea51404427"
+    }
+  ],
+  "notes": [
+    "Native geometry export, Z up.",
+    "Signage is baked to vertex colors.",
+    "Animated displays, transparent glass, orbit controls, and mirror reflections retain their richer web rendering.",
+    "One-way export; native edits do not automatically change the web source."
+  ]
+}

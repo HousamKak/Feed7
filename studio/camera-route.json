@@ -1,0 +1,67 @@
+[
+  {
+    "name": "FEED7 chapter 1",
+    "position": [
+      260,
+      340,
+      116
+    ],
+    "target": [
+      -20,
+      -60,
+      66
+    ]
+  },
+  {
+    "name": "FEED7 chapter 2",
+    "position": [
+      -56,
+      48,
+      64
+    ],
+    "target": [
+      -180,
+      -116,
+      40
+    ]
+  },
+  {
+    "name": "FEED7 chapter 3",
+    "position": [
+      70,
+      20,
+      56
+    ],
+    "target": [
+      186,
+      -130,
+      40
+    ]
+  },
+  {
+    "name": "FEED7 chapter 4",
+    "position": [
+      140,
+      -40,
+      64
+    ],
+    "target": [
+      -10,
+      -190,
+      62
+    ]
+  },
+  {
+    "name": "FEED7 chapter 5",
+    "position": [
+      -10,
+      140,
+      62
+    ],
+    "target": [
+      100,
+      20,
+      36
+    ]
+  }
+]
