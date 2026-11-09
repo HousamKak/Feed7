@@ -2,28 +2,31 @@
   "format": "feed7-studio/1",
   "name": "FEED7 / Emerald Growth Studio",
   "blocksPerMetre": 20,
-  "meshCount": 86,
-  "triangleCount": 422632,
+  "meshCount": 102,
+  "triangleCount": 534666,
   "verifiedBy": "Blockforge World + BuildExecutor + Serializer deserialize",
   "source": {
     "file": "src/studio.js",
-    "sha256": "24df8bbe40081688d2528b0606193e510277253acfed09b1d3a0752a38887818"
+    "sha256": "7871009de21bde7f59452a2ec35da2ee7c9316786f6cf63062c2afb4dab91126",
+    "cameraRouteFile": "src/camera-tour.js",
+    "cameraRouteSha256": "64dc922276252496d67ecb0a47dde76793c05650bb8a4bb9a9198f3d99536eb5"
   },
   "outputs": [
     {
       "file": "feed7.save.json",
-      "sha256": "5e51d2fd5a5c7cc294eea4cae81a438ecfcafd567365999b6f08984903c1240f"
+      "sha256": "3e4c839d1f4abd0cca0fd1e504d4d33541065649ed1558470f3fe882a0562cda"
     },
     {
       "file": "feed7.plan.json",
-      "sha256": "d2eb4402791ba576934277d12b94ca00ff9baaaaad1411afe5dbe807dfdda0ec"
+      "sha256": "1e6f30eda8bd24d1f4c47490234b94ef073908478d29ba2f99044a51b44288dc"
     },
     {
       "file": "camera-route.json",
-      "sha256": "28e53c21bcdd72e01f86f9aa0db6c4204b42dc16561be13b2a4e3bea51404427"
+      "sha256": "60ddfdb4fe92d93956df41f415e86f8ebb2b214079ce4467d372ba269d9225a0"
     }
   ],
   "notes": [
+    "SHA-256 hashes use UTF-8 text with LF newlines.",
     "Native geometry export, Z up.",
     "Signage is baked to vertex colors.",
     "Animated displays, transparent glass, orbit controls, and mirror reflections retain their richer web rendering.",

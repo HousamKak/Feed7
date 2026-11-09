@@ -1,0 +1,22 @@
+{
+  "url": "https://housamkak.github.io/Feed7/",
+  "passed": true,
+  "generatedAssets": [
+    "basalt-floor.webp",
+    "emerald-acoustic.webp",
+    "emerald-signal.webp",
+    "production-detail.webp"
+  ],
+  "checks": [
+    "Nine camera chapters",
+    "Generated images and material textures",
+    "Ambient animation and exact pause",
+    "WhatsApp request handoff",
+    "No API requests",
+    "Project-subpath navigation",
+    "Mobile reduced motion",
+    "No missing assets or runtime errors"
+  ],
+  "date": "2026-11-10",
+  "deploymentRun": "https://github.com/HousamKak/Feed7/actions/runs/42714863422"
+}
