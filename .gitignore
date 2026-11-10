@@ -19,5 +19,6 @@ public/native/studio.json
 public/native/studio*.json.gz
 public/native/*.next
 public/native/bootstrap.json
+public/native/bootstrap-*.json
 public/native/revision.json
 blockforge/objects/sofa/sofa.object.json

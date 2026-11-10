@@ -25,7 +25,7 @@ Four original assets were generated with the built-in image generation tool. Ful
 
 The studio includes separate kinetic installations: an instanced chrome ribbon installation, a lounge mobile, a procedural waveform wall, moving glass fins, floating data particles, traveling light accents, a gently floating dimensional 7, and the overhead orbital sculpture. Ambient pause freezes the scene; reduced motion removes ambient movement. No audio input is accessed.
 
-Static furniture and plants are merged by material, shadows are cached, floor reflection renders at a lower resolution and cadence, and monitor textures update at a reduced rate. The renderer uses a device-pixel-ratio cap of 1.75, multisample edge smoothing, and a restrained adaptive resolution floor of 85% on slower devices and stops drawing while a modal, hidden tab, paused scene, or reduced-motion idle view needs no updates. In a controlled local headless Chromium comparison at 1280×800 DPR 1, observed animation cadence improved from approximately 15 fps to 60 fps; performance varies by hardware. The measurements are saved in [`docs/performance.json`](docs/performance.json).
+The native studio uses separate optimized desktop and mobile deliveries. World downloads are approximately 2.28 MB on desktop and 1.04 MB on mobile, compared with the 6.14 MB full web artifact. The first scene stays covered until its environment lighting, fonts and GPU frame are ready. Geometry, textures, shader variants, bounds and cached shadows are prepared before tour entry. Mobile uses smaller textures, lighter glass and smoke, and a 30 fps cap. Desktop uses bounded drawing-buffer resolution and smaller refraction captures. Original prototype timings in docs/performance.json are historical, not measurements of this native revision.
 
 ## Run locally
 
@@ -63,7 +63,7 @@ The client portal intentionally provides request tracking now; invoicing, file c
 
 ## Blockforge authoring
 
-The local studio now uses the native world codebase in [blockforge/README.md](blockforge/README.md). Its room and asset modules generate typed world source and mesh assets, compile through Blockforge worldc, and deliver the validated artifact to the browser. Run `npm run native:build`, `npm run native:world`, then `npm run native:save` to regenerate it. Production furniture and planting reuse the existing local engine modules. The generated private preview assets are not published. The introductory logo/circuit effects still use their existing browser animation module; final visual refinement and Cycles delivery remain in progress.
+The local studio now uses the native world codebase in [blockforge/README.md](blockforge/README.md). Its room and asset modules generate typed world source and mesh assets, compile through Blockforge worldc, and deliver the validated artifact to the browser. Run `npm run native:build`, `npm run native:world`, then `npm run native:save` to regenerate it. Production furniture and planting reuse the existing local engine modules. Compiled FEED7 browser deliveries are published through GitHub Actions. Upstream engine and production dependency source stays local. The logo and circuit geometry are native assets, with browser animation and a procedural smoke effect. Final Cycles delivery remains in progress.
 
 The following export command is retained for the earlier prototype only:
 

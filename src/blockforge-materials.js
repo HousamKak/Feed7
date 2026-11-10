@@ -11,16 +11,21 @@ export function tintScannedMaterial(material,target){
  material.color.copy(color);return material;
 }
 
-export async function loadBlockforgeMaterials(renderer,{environment:includeEnvironment=true}={}){
- const response=await fetch(assetUrl('blockforge/materials.json'));
+export async function loadBlockforgeEnvironment(renderer,{mobile=false,optimized=false}={}){
+ const response=await fetch(assetUrl(mobile?'mobile/materials.json':optimized?'optimized/materials.json':'blockforge/materials.json'));if(!response.ok)throw new Error('Studio lighting unavailable');const manifest=await response.json();
+ const hdr=await new RGBELoader().loadAsync(assetUrl(manifest.environment.file)),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromEquirectangular(hdr);hdr.dispose();pmrem.dispose();return environment;
+}
+
+export async function loadBlockforgeMaterials(renderer,{environment:includeEnvironment=true,mobile=false,optimized=false}={}){
+ const response=await fetch(assetUrl(mobile?'mobile/materials.json':optimized?'optimized/materials.json':'blockforge/materials.json'));
  if(!response.ok)throw new Error('Blockforge material manifest unavailable');
  const manifest=await response.json(),loader=new THREE.TextureLoader(),materials={};
  const hdrDownload=includeEnvironment?new RGBELoader().loadAsync(assetUrl(manifest.environment.file)):null;
  hdrDownload?.catch(()=>{});
  await Promise.all(manifest.materials.map(async record=>{
-  const [map,normalMap,roughnessMap]=await Promise.all(['base','normal','roughness'].map(key=>loader.loadAsync(assetUrl(record.maps[key]))));
+  const [map,normalMap,roughnessMap]=await Promise.all((mobile?['base','normal']:['base','normal','roughness']).map(key=>loader.loadAsync(assetUrl(record.maps[key]))));
   map.colorSpace=THREE.SRGBColorSpace;
-  for(const texture of [map,normalMap,roughnessMap]){texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());}
+  for(const texture of [map,normalMap,roughnessMap].filter(Boolean)){texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=mobile?1:Math.min(4,renderer.capabilities.getMaxAnisotropy());}
   materials[record.id]={map,normalMap,roughnessMap,userData:{blockforgeMaterial:record.id,tileMeters:record.pbr.tile,average:record.average},metalness:record.pbr.metalness,normalScale:new THREE.Vector2(record.pbr.normalScale,record.pbr.normalScale)};
  }));
  if(!includeEnvironment)return {materials,environment:null};

@@ -3,13 +3,14 @@ import {assetUrl} from './config.js';
 
 export const smooth=(a,b,x)=>{const t=THREE.MathUtils.clamp((x-a)/(b-a),0,1);return t*t*t*(t*(t*6-15)+10);};
 
-export async function createBrandSequence(scene,{nativeLogo,nativeCircuitFloor=false}={}){
+export async function createBrandSequence(scene,{nativeLogo,nativeCircuitFloor=false,mobile=false}={}){
  const response=await fetch(assetUrl('brand/monogram.json'));if(!response.ok)throw new Error('Brand geometry unavailable');
  const data=await response.json();
  const shapes=data.paths.map(commands=>{const shape=new THREE.Shape();const point=(x,y)=>[(x-data.width/2)/data.height,(data.height/2-y)/data.height];for(const [op,...v]of commands){if(op==='M')shape.moveTo(...point(...v));if(op==='L')shape.lineTo(...point(...v));if(op==='C')shape.bezierCurveTo(...point(v[0],v[1]),...point(v[2],v[3]),...point(v[4],v[5]));if(op==='Z')shape.closePath();}return shape;});
  const root=new THREE.Group();root.userData.webOnly=true;scene.add(root);
  const crystalSpec=nativeLogo?.appearance?.materialSpec||{};
  const porcelain=new THREE.MeshPhysicalMaterial({color:crystalSpec.baseColor||'#f2eee3',metalness:0,roughness:crystalSpec.roughness??.025,transmission:crystalSpec.transmission??.86,ior:crystalSpec.ior??1.9,thickness:crystalSpec.thickness??.23,attenuationColor:crystalSpec.attenuationColor||'#f2eee3',attenuationDistance:crystalSpec.attenuationDistance??.8,dispersion:crystalSpec.dispersion??.05,clearcoat:1,clearcoatRoughness:.025,flatShading:true});
+ if(mobile){porcelain.transmission=0;porcelain.dispersion=0;porcelain.roughness=.07;}
  const edge=porcelain;
  let geometry;
  if(nativeLogo){const src=nativeLogo.geometry;geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(src.positions.map(v=>v*nativeLogo.cellSizeM),3));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(src.normals,3));geometry.setIndex(src.indices);geometry.rotateX(-Math.PI/2);}
@@ -21,8 +22,10 @@ export async function createBrandSequence(scene,{nativeLogo,nativeCircuitFloor=f
  const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(haloCanvas),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));halo.position.set(0,5.8,27.6);halo.scale.set(8,10,1);root.add(halo);
  const rim=new THREE.LineSegments(new THREE.EdgesGeometry(geometry,40),new THREE.LineBasicMaterial({color:'#b9e9cf',transparent:true,opacity:.2}));rim.visible=false;mark.add(rim);
  if(!nativeCircuitFloor){const stage=new THREE.Mesh(new THREE.PlaneGeometry(65,55),new THREE.MeshStandardMaterial({color:'#020806',roughness:.85,metalness:.12}));stage.rotation.x=-Math.PI/2;stage.position.set(0,-.04,22);root.add(stage);}
- const glow=new THREE.PointLight('#e6efe5',45,22,2);glow.position.set(-3,5,31);root.add(glow);
- const rimLight=new THREE.PointLight('#ffe8cb',70,22,2);rimLight.position.set(4,7,26);root.add(rimLight);
+ // Keep the light count stable when the opening geometry is hidden. Changing
+ // intensity avoids compiling a new lighting program at studio entry.
+ const glow=new THREE.PointLight('#e6efe5',45,22,2);glow.position.set(-3,5,31);scene.add(glow);
+ const rimLight=new THREE.PointLight('#ffe8cb',70,22,2);rimLight.position.set(4,7,26);scene.add(rimLight);
  const roads=[];
  const signal=new THREE.MeshBasicMaterial({color:new THREE.Color('#73e8ae').multiplyScalar(1.5),transparent:true,opacity:1});
  const roadMat=new THREE.MeshStandardMaterial({color:'#102e23',metalness:.7,roughness:.32});

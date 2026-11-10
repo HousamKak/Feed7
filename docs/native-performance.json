@@ -1,0 +1,13 @@
+{
+  "revision": "native-device-deliveries-2026-11-10",
+  "worldPayloads": {
+    "original": {"gzipBytes": 6136514, "drawnTriangles": 756494},
+    "desktop": {"gzipBytes": 2282290, "drawnTriangles": 400067, "budgetBytes": 3000000},
+    "mobile": {"gzipBytes": 1035005, "drawnTriangles": 176864, "budgetBytes": 1500000}
+  },
+  "firstScene": "Opening cover stays until lighting, fonts and a GPU-complete frame are ready",
+  "tourEntry": "Geometry, textures, bounds, shaders and shadows prepared before controls unlock",
+  "desktopRegression": {"shaderProgramsBeforeEntry": 40, "shaderProgramsAcrossRoute": 40, "newBuffersAcrossRoute": 0, "newTexturesAcrossRoute": 0},
+  "mobileValidation": "Production build in Chrome mobile emulation, high DPR, cold cache, 1.6 Mbps and 80 ms latency",
+  "notes": "Payload and GPU-resource measurements, not universal frame-rate or physical-phone load-time guarantees. Original docs/performance.json describes the retired prototype."
+}

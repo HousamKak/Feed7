@@ -14,7 +14,8 @@
     "test:pages": "node scripts/pages-qa.mjs",
     "native:build": "node blockforge/tools/author-native.mjs && node blockforge/tools/compile-web.mjs",
     "test:native": "node scripts/native-qa.mjs",
-    "native:world": "node blockforge/tools/build-world.mjs",
+    "native:world": "node blockforge/tools/build-world.mjs && npm run native:optimize",
+    "native:optimize": "node blockforge/tools/build-mobile.mjs && node blockforge/tools/build-mobile.mjs --desktop",
     "test:native-world": "node scripts/native-world-qa.mjs",
     "native:save": "node blockforge/tools/save-world.mjs",
     "test:native-models": "node scripts/review-native-models.mjs"
