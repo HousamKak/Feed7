@@ -57,6 +57,12 @@ npm start
 
 ## Full backend deployment
 
+The Pages build includes a lightweight animated opening directly in its HTML. It stays visible until geometry, textures, shaders, and initial GPU draws are ready. Services can be opened during preparation. There is no second preparation overlay after entering the studio.
+
+Production visits cache public site assets in a service worker and decoded native geometry in IndexedDB. World cache keys contain the compiled delivery hash. Each build stamps the service worker to invalidate changed unversioned assets. Private API, admin, and portal requests are excluded. Browsers can evict stored data; GPU resources still need initialization on each page load. Development does not register a service worker.
+
+Run `node scripts/cache-opening-qa.mjs` after `npm run build:pages` to verify the opening before JavaScript, desktop and mobile cache reuse, offline refreshes, and chapter navigation. `node scripts/loading-regression.mjs` holds the studio download to verify the opening and services remain usable until preparation completes.
+
 The public contact handoff uses the number supplied in the brief, `+961 81 112 046`. To deploy the optional backend, set admin credentials, use HTTPS on a persistent Node host, and establish database backups. Real client case studies, team biographies, service pricing, and booking availability were not supplied; the work section labels its internal concepts explicitly. No automated booking, payment, or email delivery is claimed.
 
 The client portal intentionally provides request tracking now; invoicing, file collaboration, and a full account-based client workspace can extend this foundation later.

@@ -15,7 +15,7 @@ export async function createNativeStudio(container,onReady){
  const mobile=matchMedia('(max-width:760px), (pointer:coarse)').matches||navigator.connection?.saveData===true,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const areaLighting=!mobile&&new URLSearchParams(location.search).get('quality')==='high';
  const worker=new Worker(new URL('./native-world-loader.js',import.meta.url),{type:'module'});
- const worldDownload=new Promise((resolve,reject)=>{worker.onmessage=({data})=>{worker.terminate();data.error?reject(new Error(data.error)):resolve(data.data);};worker.onerror=e=>{worker.terminate();reject(new Error(e.message));};});
+ const worldDownload=new Promise((resolve,reject)=>{worker.onmessage=({data})=>{if(data.progress){window.dispatchEvent(new CustomEvent('feed7-loading',{detail:data.progress}));return;}if(!data.error)window.__FEED7_NATIVE_WORLD__.worldCacheHit=data.cacheHit;worker.terminate();data.error?reject(new Error(data.error)):resolve(data.data);};worker.onerror=e=>{worker.terminate();reject(new Error(e.message));};});
  // Retain a rejection handler while the small opening scene is prepared.
  worldDownload.catch(()=>{});
  const response=await fetch(assetUrl(`native/bootstrap-${mobile?'mobile':'desktop'}.json.gz`),{cache:'no-cache'});if(!response.ok)throw new Error('Native opening unavailable');
@@ -32,8 +32,7 @@ export async function createNativeStudio(container,onReady){
  const atmosphere=createStudioAtmosphere(scene,bootstrap.atmosphere||atmosphereDefaults,rig.background,{mobile});
  const camera=new THREE.PerspectiveCamera(49,innerWidth/innerHeight,.06,150),controls=new OrbitControls(camera,renderer.domElement);controls.enabled=false;controls.minDistance=3;controls.maxDistance=40;controls.enableDamping=!reduced;
  scene.environmentIntensity=rig.environmentIntensity;
- // The opening gets its own small reflection environment. Bulk room requests
- // start after this critical scene, so they cannot compete for its bandwidth.
+ // The small opening reflection environment also serves the mobile room.
  const environmentDownload=loadBlockforgeEnvironment(renderer,{mobile:true,optimized:true});environmentDownload.catch(()=>{});let studioEnvironment;
  scene.add(new THREE.HemisphereLight(rig.hemisphere.sky,rig.hemisphere.ground,rig.hemisphere.intensity));
  for(const spec of rig.lights){if(mobile&&(spec.type==='area'||spec.type==='spot'&&spec.id!=='crystal-key'))continue;const l=spec.type==='area'?(areaLighting?new THREE.RectAreaLight(spec.color,spec.intensity,...spec.size):new THREE.PointLight(spec.color,spec.intensity*spec.size[0]*spec.size[1]/Math.PI,18,2)):spec.type==='directional'?new THREE.DirectionalLight(spec.color,spec.intensity):spec.type==='spot'?new THREE.SpotLight(spec.color,spec.intensity,spec.range,(spec.angleDegrees||40)*Math.PI/180,.65,2):new THREE.PointLight(spec.color,spec.intensity,spec.range,2);l.position.set(spec.at[0],spec.at[2],-spec.at[1]);if(spec.target){if(l.target){l.target.position.set(spec.target[0],spec.target[2],-spec.target[1]);scene.add(l.target);}else l.lookAt(spec.target[0],spec.target[2],-spec.target[1]);}if(spec.shadows&&!mobile){l.castShadow=true;l.shadow.mapSize.set(2048,2048);Object.assign(l.shadow.camera,{left:-18,right:18,top:16,bottom:-16,far:50});l.shadow.normalBias=.025;}scene.add(l);}
@@ -72,7 +71,8 @@ export async function createNativeStudio(container,onReady){
  async function populateWorld(){
  data=await worldDownload;if(data.provenance.validation.status!=='pass')throw new Error('Native world has not passed compiler validation');imported=await materialDownload;studioEnvironment=await studioEnvironmentDownload;if(!active)return;scene.environment=studioEnvironment.texture;
  await Promise.all(Object.keys(data.appearance).map(makeMaterial));
- for(const mesh of data.meshes){
+ let builtMeshes=0;for(const mesh of data.meshes){
+  window.dispatchEvent(new CustomEvent('feed7-loading',{detail:{phase:'geometry',value:builtMeshes++/data.meshes.length}}));
   const src=mesh.instances.geometry,placements=mesh.instances.placements,first=placements[0].key,id=data.entityMaterials[first],meta=data.entityMetadata[first]||{},appearance=data.appearance[id];
   if(meta.sequenceOnly)continue;
   if(!active)return;await new Promise(resolve=>setTimeout(resolve,0));
@@ -96,7 +96,7 @@ export async function createNativeStudio(container,onReady){
   }else (meta.alwaysVisible?permanent:world).add(object);
   if(meta.motion?.kind==='glow'&&material.emissive)animated.push({material,motion:meta.motion,baseEmission:material.emissiveIntensity});
  }
- drawScreens();performance.mark('feed7-gpu-preparation-start');
+ drawScreens();window.dispatchEvent(new CustomEvent('feed7-loading',{detail:{phase:'gpu',value:0}}));performance.mark('feed7-gpu-preparation-start');
  const preparation=await prepareStudio({renderer,scene,camera,world,permanent,clip,materials,stops,mobile,active:()=>active});if(!active)return;
  shadowReady=true;worldReady=true;dirty=true;performance.mark('feed7-world-ready');window.__FEED7_NATIVE_WORLD__={...window.__FEED7_NATIVE_WORLD__,ready:true,preparation,meshes:data.meshes.length,entities:Object.keys(data.entityMaterials).length};
  container.dispatchEvent(new CustomEvent('studio-loaded'));
@@ -126,10 +126,13 @@ export async function createNativeStudio(container,onReady){
  drawScreens();render(0);window.addEventListener('resize',resize);
  window.__FEED7_NATIVE_WORLD__={project:bootstrap.project,compiler:bootstrap.compiler,sourceRevision:bootstrap.provenance.sourceRevision,deliveryRevision:bootstrap.provenance.deliveryRevision,validation:bootstrap.provenance.validation.status,tier:mobile?'mobile':'desktop',ready:false,renderPipeline:'direct-physical/4'};
  if(import.meta.env.DEV&&new URLSearchParams(location.search).has('debug'))window.__FEED7_DEBUG__={scene,camera,renderer,world,permanent};
- const environment=await environmentDownload;scene.environment=environment.texture;sequence.setEnvironment(environment.texture,rig.environmentIntensity);await renderer.compileAsync(scene,camera);dirty=true;await new Promise(resolve=>requestAnimationFrame(resolve));await waitForGPU(renderer,()=>active);
- await document.fonts.ready;window.__FEED7_NATIVE_WORLD__.openingReady=true;performance.mark('feed7-logo-visible');worker.postMessage(new URL(assetUrl(bootstrap.worldFile),location.href).href);onReady?.();
- const studioEnvironmentDownload=mobile?Promise.resolve(environment):loadBlockforgeEnvironment(renderer,{optimized:true});studioEnvironmentDownload.catch(()=>{});
+ // The lightweight HTML opening is already visible. Download the room in
+ // parallel with GPU setup instead of introducing another serial wait.
+ worker.postMessage(new URL(assetUrl(bootstrap.worldFile),location.href).href);
+ const studioEnvironmentDownload=mobile?environmentDownload:loadBlockforgeEnvironment(renderer,{optimized:true});studioEnvironmentDownload.catch(()=>{});
  const materialDownload=loadBlockforgeMaterials(renderer,{mobile,optimized:true,environment:false});materialDownload.catch(()=>{});
+ const environment=await environmentDownload;scene.environment=environment.texture;sequence.setEnvironment(environment.texture,rig.environmentIntensity);await renderer.compileAsync(scene,camera);dirty=true;await new Promise(resolve=>requestAnimationFrame(resolve));await waitForGPU(renderer,()=>active);
+ await document.fonts.ready;window.__FEED7_NATIVE_WORLD__.openingReady=true;performance.mark('feed7-logo-visible');onReady?.();
  const worldBuild=populateWorld();worldBuild.catch(e=>{console.error('Native studio loading failed:',e);container.dispatchEvent(new CustomEvent('studio-error'));});
  return {whenWorldReady:()=>worldBuild,isReadyForTour:()=>worldReady,setProgress(v){progress=v;dirty=true;},jumpTo(v){progress=v;current=worldReady?v:0;dirty=true;},setPaused(v){paused=v;dirty=true;},setSuspended(v){suspended=v;dirty=true;},setExplore(v){exploring=v;controls.enabled=v;dirty=true;},getStats(){return {...renderer.info.render,nativeWorld:true};},destroy(){active=false;worker.terminate();cancelAnimationFrame(frame);window.removeEventListener('resize',resize);controls.dispose();atmosphere.dispose();renderer.dispose();environment.dispose();if(studioEnvironment!==environment)studioEnvironment?.dispose();}};
 }

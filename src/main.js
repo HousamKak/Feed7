@@ -5,6 +5,9 @@ import {mountAdmin} from './admin.js';
 import {services,chapters,faqs} from './content.js';
 import {createStudio} from './studio.js';
 import {cameraStops} from './camera-tour.js';
+import {createLoadingIntro} from './loading-intro.js';
+import {initializePersistentCache,cacheUsedAssets} from './persistent-cache.js';
+const intro=createLoadingIntro(),cacheReady=initializePersistentCache();
 
 // Agency content is persisted by the admin dashboard; source values remain the
 // fallback when the API is unavailable, including during a static preview.
@@ -30,8 +33,6 @@ app.innerHTML=`
  <nav class="chapter-dock" aria-label="Studio chapters">${chapters.map((c,i)=>`<button data-chapter="${i}" aria-label="${esc(c.label)}" title="${esc(c.label)}"><span class="chapter-number">${String(i+1).padStart(2,'0')}</span><span class="chapter-name">${esc(c.label)}</span><i></i></button>`).join('')}</nav>
  <div class="footer-actions"><button id="motion-toggle" class="icon-button" aria-label="Pause ambient animations" title="Pause ambient animations">Ⅱ</button><button data-open="menu" class="studio-map" aria-label="Open studio directory"><svg viewBox="0 0 60 45"><path d="M4 6h49v31H4zM27 6v31M27 23h26M4 18h23"/><circle id="map-dot" cx="15" cy="27" r="3"/></svg><span>STUDIO DIRECTORY</span></button></div></footer>
  <div class="tour-progress"><i></i></div>
- <div class="loading" role="status"><span class="wordmark">FEED<span>7</span></span><span>OPENING YOUR DIGITAL WORLD</span><i></i></div>
- <div id="studio-preparation" class="studio-preparation" role="status" hidden><span class="status-dot"></span>Preparing your studio. Take in the view.</div>
  <dialog id="panel" aria-label="FEED7 studio information"><div class="panel-head"><a class="wordmark" href="${BASE}">FEED<span>7</span></a><button id="close-panel" class="icon-button" aria-label="Close dialog">✕</button></div><div id="panel-content"></div></dialog>
  <div id="toast" role="status"></div>`;
 const panel=document.querySelector('#panel'),content=document.querySelector('#panel-content');
@@ -80,12 +81,12 @@ async function renderAdmin(){if(STATIC_HOSTED){content.innerHTML=label('FEED7','
 async function adminDashboard(){await mountAdmin({content,api,esc,label,arrow,toast,onLogout:async()=>{await api('/api/admin/logout',{method:'POST'});renderAdmin();}});}
 
 // The content and request flow remain usable when WebGL is unavailable.
-try{studio=await createStudio(document.querySelector('#world'),()=>{document.querySelector('.loading').classList.add('done');});onScroll();}catch(e){console.error('Studio unavailable:',e);document.body.classList.remove('model-review');document.querySelector('.loading').classList.add('done');document.body.classList.add('fallback');document.querySelector('.scene-caption').textContent='FEED7 / EXPLORE OUR DIGITAL WORLD';}
-if(studio?.isReadyForTour&&!studio.isReadyForTour()){
- const controls=[...document.querySelectorAll('#cinematic-action,#scroll-next,#next-perspective,#explore-toggle,[data-chapter]:not([data-chapter="0"])')];
- document.body.classList.add('studio-preparing');document.querySelector('#studio-preparation').hidden=false;controls.forEach(button=>button.disabled=true);
- studio.whenWorldReady().catch(()=>{}).finally(()=>{document.body.classList.remove('studio-preparing');document.querySelector('#studio-preparation').hidden=true;controls.forEach(button=>button.disabled=false);onScroll();});
-}
+try{
+ studio=await createStudio(document.querySelector('#world'),()=>intro.update({phase:'world'}));
+ studio.setSuspended?.(true);await studio.whenWorldReady?.();studio.jumpTo?.(0);studio.setSuspended?.(panel.open);
+ await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));intro.complete();onScroll();
+ cacheReady.then(()=>cacheUsedAssets());
+}catch(e){console.error('Studio unavailable:',e);studio?.setSuspended?.(false);document.body.classList.remove('model-review');intro.complete();document.body.classList.add('fallback');document.querySelector('.scene-caption').textContent='FEED7 / EXPLORE OUR DIGITAL WORLD';}
 if(import.meta.env.DEV&&!url.searchParams.has('prototype')){
  const saved=sessionStorage.getItem('feed7-native-preview-position');
  if(saved&&!url.searchParams.has('model')){sessionStorage.removeItem('feed7-native-preview-position');const p=Number(saved);if(Number.isFinite(p)){scrollTo({top:p*innerHeight,behavior:'instant'});studio?.jumpTo(p);onScroll();}}
