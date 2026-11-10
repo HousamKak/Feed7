@@ -97,7 +97,7 @@ export async function createNativeStudio(container,onReady){
   if(meta.motion?.kind==='glow'&&material.emissive)animated.push({material,motion:meta.motion,baseEmission:material.emissiveIntensity});
  }
  drawScreens();performance.mark('feed7-gpu-preparation-start');
- const preparation=await prepareStudio({renderer,scene,camera,world,clip,materials,stops,mobile,active:()=>active});if(!active)return;
+ const preparation=await prepareStudio({renderer,scene,camera,world,permanent,clip,materials,stops,mobile,active:()=>active});if(!active)return;
  shadowReady=true;worldReady=true;dirty=true;performance.mark('feed7-world-ready');window.__FEED7_NATIVE_WORLD__={...window.__FEED7_NATIVE_WORLD__,ready:true,preparation,meshes:data.meshes.length,entities:Object.keys(data.entityMaterials).length};
  container.dispatchEvent(new CustomEvent('studio-loaded'));
  }
@@ -114,6 +114,9 @@ export async function createNativeStudio(container,onReady){
   const assembly=sequence.update(current,time,reduced);world.visible=worldReady&&assembly>.001;clip.constant=10.8*assembly-.1;world.position.y=-.2*(1-assembly);
   atmosphere.update(current,time,reduced);
   const closing=current>11,phase=closing?(12-current)*3:current,contact=smooth(1.12,1.48,phase),ignition=smooth(1.23,1.5,phase),pulse=contact*(1-smooth(1.5,2.35,phase));
+  // The first composition is complete on its own. The ground rises only as
+  // the visitor begins the journey, never popping in during background loads.
+  permanent.visible=phase>.01;permanent.position.y=-12*(1-smooth(.06,.85,phase));
   contactLight.intensity=worldReady?38*pulse:0;for(const c of contacts){c.object.visible=pulse>.001;c.material.emissiveIntensity=1.8*pulse;}
   for(const material of traces)material.emissiveIntensity=.04+.7*pulse+.09*ignition;
   const wave=Math.max(0,phase-1.26)*27;circuitUniforms.wave.value=wave;circuitUniforms.time.value=time;circuitUniforms.ignition.value=ignition;
