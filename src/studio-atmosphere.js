@@ -16,7 +16,8 @@ export function createStudioAtmosphere(scene,settings,background,{mobile=false}=
   vec2 warp=vec2(fbm(p*.75+vec2(t*.23,-t*.17)),fbm(p*.8+vec2(-t*.19,t*.13)+13.));
   vec2 flow=p+warp*2.5+vec2(t*.17,-t*.22);
   float cloud=fbm(flow*1.35),wisps=${mobile?'cloud':'fbm(flow*2.8+warp)'};
-  float ribbon=exp(-pow((p.y+.28-sin(p.x*.8+t*.22)*.45+(warp.y-.5)*1.7)*.8,2.));
+  float ribbonY=(p.y+.28-sin(p.x*.8+t*.22)*.45+(warp.y-.5)*1.7)*.8;
+  float ribbon=exp(-ribbonY*ribbonY);
   float density=smoothstep(.24,.76,cloud)*(.38+.62*ribbon);
   float rim=pow(clamp(wisps*1.6-.35,0.,1.),3.)*density;
   float veil=(.68+.32*sin(p.x*.65+p.y*.8+t*.14));

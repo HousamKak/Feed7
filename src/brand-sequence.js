@@ -48,7 +48,7 @@ export async function createBrandSequence(scene,{nativeLogo,nativeCircuitFloor=f
  for(const [x,y,z,w,h,d]of [[0,4,0,28,8,22],[-9,1.2,-5,6.6,2.4,6.6],[9,1.2,-5,6.6,2.4,6.6],[8,1,3.8,7,2,4]]){const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)),blueprintMat);outline.position.set(x,y,z);blueprint.add(outline);}
  const sweep=new THREE.Mesh(new THREE.TorusGeometry(15,.012,5,100),new THREE.MeshBasicMaterial({color:'#b2ffcc',transparent:true,opacity:.5}));sweep.rotation.x=Math.PI/2;root.add(sweep);
  const ivory=new THREE.Color('#f2eee3');
- return {shapes,update(progress,time,reduced=false){
+ return {shapes,setEnvironment(texture,intensity=.8){porcelain.envMap=texture;porcelain.envMapIntensity=intensity;porcelain.needsUpdate=true;},update(progress,time,reduced=false){
   const closing=progress>11;const phase=closing?(12-progress)*3:progress;
   root.visible=progress<3.1||progress>11.05;
   const unfold=smooth(.2,1.5,phase),reveal=smooth(1.5,2.9,phase);

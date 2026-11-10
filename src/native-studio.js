@@ -13,6 +13,7 @@ import {prepareStudio,waitForGPU} from './studio-preparation.js';
 
 export async function createNativeStudio(container,onReady){
  const mobile=matchMedia('(max-width:760px), (pointer:coarse)').matches||navigator.connection?.saveData===true,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const areaLighting=!mobile&&new URLSearchParams(location.search).get('quality')==='high';
  const worker=new Worker(new URL('./native-world-loader.js',import.meta.url),{type:'module'});
  const worldDownload=new Promise((resolve,reject)=>{worker.onmessage=({data})=>{worker.terminate();data.error?reject(new Error(data.error)):resolve(data.data);};worker.onerror=e=>{worker.terminate();reject(new Error(e.message));};});
  // Retain a rejection handler while the small opening scene is prepared.
@@ -20,21 +21,22 @@ export async function createNativeStudio(container,onReady){
  const response=await fetch(assetUrl(`native/bootstrap-${mobile?'mobile':'desktop'}.json.gz`),{cache:'no-cache'});if(!response.ok)throw new Error('Native opening unavailable');
  const decoded=!response.headers.get('content-encoding')?.includes('gzip')?new Response(response.body.pipeThrough(new DecompressionStream('gzip'))):response;
  const bootstrap=await decoded.json();let data,imported,worldReady=false;
- worker.postMessage(new URL(assetUrl(bootstrap.worldFile||'native/studio.json.gz'),location.href).href);
  const pixelRatio=()=>Math.min(devicePixelRatio||1,mobile?1.25:1.5,Math.sqrt((mobile?800000:3000000)/(innerWidth*innerHeight)));
  const renderer=new THREE.WebGLRenderer({antialias:!mobile,powerPreference:'high-performance'});renderer.setPixelRatio(pixelRatio());renderer.setSize(innerWidth,innerHeight);renderer.transmissionResolutionScale=.75;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.localClippingEnabled=true;container.appendChild(renderer.domElement);renderer.domElement.setAttribute('aria-label','FEED7 studio, compiled from the native Blockforge world codebase');
  // Three also creates a multisampled HDR target internally for transmission.
  // Normalize it before allocation, as well as our compositor's own targets.
  const bindTarget=renderer.setRenderTarget.bind(renderer);renderer.setRenderTarget=(target,...args)=>{if(target?.texture.type===THREE.HalfFloatType&&target.samples)target.samples=0;return bindTarget(target,...args);};
  const rig=bootstrap.lightRig;
- if(!mobile)(await import('three/addons/lights/RectAreaLightUniformsLib.js')).RectAreaLightUniformsLib.init();
+ if(areaLighting)(await import('three/addons/lights/RectAreaLightUniformsLib.js')).RectAreaLightUniformsLib.init();
  const scene=new THREE.Scene();scene.background=new THREE.Color(rig.background);scene.fog=new THREE.FogExp2(rig.background,.013);renderer.toneMappingExposure=rig.exposure;
  const atmosphere=createStudioAtmosphere(scene,bootstrap.atmosphere||atmosphereDefaults,rig.background,{mobile});
  const camera=new THREE.PerspectiveCamera(49,innerWidth/innerHeight,.06,150),controls=new OrbitControls(camera,renderer.domElement);controls.enabled=false;controls.minDistance=3;controls.maxDistance=40;controls.enableDamping=!reduced;
  scene.environmentIntensity=rig.environmentIntensity;
- const environmentDownload=loadBlockforgeEnvironment(renderer,{mobile,optimized:true});environmentDownload.catch(()=>{});
+ // The opening gets its own small reflection environment. Bulk room requests
+ // start after this critical scene, so they cannot compete for its bandwidth.
+ const environmentDownload=loadBlockforgeEnvironment(renderer,{mobile:true,optimized:true});environmentDownload.catch(()=>{});let studioEnvironment;
  scene.add(new THREE.HemisphereLight(rig.hemisphere.sky,rig.hemisphere.ground,rig.hemisphere.intensity));
- for(const spec of rig.lights){if(mobile&&(spec.type==='area'||spec.type==='spot'&&spec.id!=='crystal-key'))continue;const l=spec.type==='area'?new THREE.RectAreaLight(spec.color,spec.intensity,...spec.size):spec.type==='directional'?new THREE.DirectionalLight(spec.color,spec.intensity):spec.type==='spot'?new THREE.SpotLight(spec.color,spec.intensity,spec.range,(spec.angleDegrees||40)*Math.PI/180,.65,2):new THREE.PointLight(spec.color,spec.intensity,spec.range,2);l.position.set(spec.at[0],spec.at[2],-spec.at[1]);if(spec.target){if(l.target){l.target.position.set(spec.target[0],spec.target[2],-spec.target[1]);scene.add(l.target);}else l.lookAt(spec.target[0],spec.target[2],-spec.target[1]);}if(spec.shadows&&!mobile){l.castShadow=true;l.shadow.mapSize.set(2048,2048);Object.assign(l.shadow.camera,{left:-18,right:18,top:16,bottom:-16,far:50});l.shadow.normalBias=.025;}scene.add(l);}
+ for(const spec of rig.lights){if(mobile&&(spec.type==='area'||spec.type==='spot'&&spec.id!=='crystal-key'))continue;const l=spec.type==='area'?(areaLighting?new THREE.RectAreaLight(spec.color,spec.intensity,...spec.size):new THREE.PointLight(spec.color,spec.intensity*spec.size[0]*spec.size[1]/Math.PI,18,2)):spec.type==='directional'?new THREE.DirectionalLight(spec.color,spec.intensity):spec.type==='spot'?new THREE.SpotLight(spec.color,spec.intensity,spec.range,(spec.angleDegrees||40)*Math.PI/180,.65,2):new THREE.PointLight(spec.color,spec.intensity,spec.range,2);l.position.set(spec.at[0],spec.at[2],-spec.at[1]);if(spec.target){if(l.target){l.target.position.set(spec.target[0],spec.target[2],-spec.target[1]);scene.add(l.target);}else l.lookAt(spec.target[0],spec.target[2],-spec.target[1]);}if(spec.shadows&&!mobile){l.castShadow=true;l.shadow.mapSize.set(2048,2048);Object.assign(l.shadow.camera,{left:-18,right:18,top:16,bottom:-16,far:50});l.shadow.normalBias=.025;}scene.add(l);}
  const nativeLogo=bootstrap.nativeLogo;
  const sequence=await createBrandSequence(scene,{nativeLogo,nativeCircuitFloor:true,mobile}),world=new THREE.Group(),permanent=new THREE.Group(),packets=[],contacts=[],traces=[];scene.add(world,permanent);
  const contactLight=new THREE.PointLight('#9ce9ba',0,10,2);contactLight.position.set(0,.5,24);scene.add(contactLight);
@@ -58,7 +60,8 @@ export async function createNativeStudio(container,onReady){
   if(scan)tintScannedMaterial(m,a.color);
   if(a.contactEffect==='energized-track'){
    m.onBeforeCompile=shader=>{Object.assign(shader.uniforms,{circuitWave:circuitUniforms.wave,circuitTime:circuitUniforms.time,circuitIgnition:circuitUniforms.ignition});shader.vertexShader='varying float trackDistance;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntrackDistance=uv.x;');shader.fragmentShader='varying float trackDistance;uniform float circuitWave,circuitTime,circuitIgnition;\n'+shader.fragmentShader.replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
-    float lead=exp(-pow((trackDistance-circuitWave)*.6,2.));
+    float waveDelta=(trackDistance-circuitWave)*.6;
+    float lead=exp(-waveDelta*waveDelta);
     float trail=exp(-max(0.,circuitWave-trackDistance)*.14)*step(trackDistance,circuitWave);
     float signal=pow(max(0.,sin(trackDistance*.5-circuitTime*1.5)),24.)*.13;
     totalEmissiveRadiance+=vec3(.12,.72,.32)*(lead*2.8+trail*.35+signal)*circuitIgnition;`);};m.customProgramCacheKey=()=> 'feed7-circuit-wave/1';
@@ -67,7 +70,7 @@ export async function createNativeStudio(container,onReady){
  }
  const basis=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2),inverse=basis.clone().invert(),matrix=new THREE.Matrix4(),rotation=new THREE.Quaternion(),position=new THREE.Vector3(),scale=new THREE.Vector3();
  async function populateWorld(){
- data=await worldDownload;if(data.provenance.validation.status!=='pass')throw new Error('Native world has not passed compiler validation');imported=await materialDownload;if(!active)return;
+ data=await worldDownload;if(data.provenance.validation.status!=='pass')throw new Error('Native world has not passed compiler validation');imported=await materialDownload;studioEnvironment=await studioEnvironmentDownload;if(!active)return;scene.environment=studioEnvironment.texture;
  await Promise.all(Object.keys(data.appearance).map(makeMaterial));
  for(const mesh of data.meshes){
   const src=mesh.instances.geometry,placements=mesh.instances.placements,first=placements[0].key,id=data.entityMaterials[first],meta=data.entityMetadata[first]||{},appearance=data.appearance[id];
@@ -120,9 +123,10 @@ export async function createNativeStudio(container,onReady){
  drawScreens();render(0);window.addEventListener('resize',resize);
  window.__FEED7_NATIVE_WORLD__={project:bootstrap.project,compiler:bootstrap.compiler,sourceRevision:bootstrap.provenance.sourceRevision,deliveryRevision:bootstrap.provenance.deliveryRevision,validation:bootstrap.provenance.validation.status,tier:mobile?'mobile':'desktop',ready:false,renderPipeline:'direct-physical/4'};
  if(import.meta.env.DEV&&new URLSearchParams(location.search).has('debug'))window.__FEED7_DEBUG__={scene,camera,renderer,world,permanent};
- const environment=await environmentDownload;scene.environment=environment.texture;await renderer.compileAsync(scene,camera);dirty=true;await new Promise(resolve=>requestAnimationFrame(resolve));await waitForGPU(renderer,()=>active);
- await document.fonts.ready;window.__FEED7_NATIVE_WORLD__.openingReady=true;performance.mark('feed7-logo-visible');onReady?.();
+ const environment=await environmentDownload;scene.environment=environment.texture;sequence.setEnvironment(environment.texture,rig.environmentIntensity);await renderer.compileAsync(scene,camera);dirty=true;await new Promise(resolve=>requestAnimationFrame(resolve));await waitForGPU(renderer,()=>active);
+ await document.fonts.ready;window.__FEED7_NATIVE_WORLD__.openingReady=true;performance.mark('feed7-logo-visible');worker.postMessage(new URL(assetUrl(bootstrap.worldFile),location.href).href);onReady?.();
+ const studioEnvironmentDownload=mobile?Promise.resolve(environment):loadBlockforgeEnvironment(renderer,{optimized:true});studioEnvironmentDownload.catch(()=>{});
  const materialDownload=loadBlockforgeMaterials(renderer,{mobile,optimized:true,environment:false});materialDownload.catch(()=>{});
  const worldBuild=populateWorld();worldBuild.catch(e=>{console.error('Native studio loading failed:',e);container.dispatchEvent(new CustomEvent('studio-error'));});
- return {whenWorldReady:()=>worldBuild,isReadyForTour:()=>worldReady,setProgress(v){progress=v;dirty=true;},jumpTo(v){progress=v;current=worldReady?v:0;dirty=true;},setPaused(v){paused=v;dirty=true;},setSuspended(v){suspended=v;dirty=true;},setExplore(v){exploring=v;controls.enabled=v;dirty=true;},getStats(){return {...renderer.info.render,nativeWorld:true};},destroy(){active=false;worker.terminate();cancelAnimationFrame(frame);window.removeEventListener('resize',resize);controls.dispose();atmosphere.dispose();renderer.dispose();environment.dispose();}};
+ return {whenWorldReady:()=>worldBuild,isReadyForTour:()=>worldReady,setProgress(v){progress=v;dirty=true;},jumpTo(v){progress=v;current=worldReady?v:0;dirty=true;},setPaused(v){paused=v;dirty=true;},setSuspended(v){suspended=v;dirty=true;},setExplore(v){exploring=v;controls.enabled=v;dirty=true;},getStats(){return {...renderer.info.render,nativeWorld:true};},destroy(){active=false;worker.terminate();cancelAnimationFrame(frame);window.removeEventListener('resize',resize);controls.dispose();atmosphere.dispose();renderer.dispose();environment.dispose();if(studioEnvironment!==environment)studioEnvironment?.dispose();}};
 }
