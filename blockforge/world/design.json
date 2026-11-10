@@ -1,0 +1,21 @@
+{
+  "id": "feed7-studio",
+  "units": "metres",
+  "frame": "Z up, X right, Y toward the rear wall",
+  "bounds": {"min": [-15,-36,-0.7], "max": [15,14,11]},
+  "palette": {
+    "wall": "#164134", "ink": "#101b17", "metal": "#34453e",
+    "wood": "#876649", "woodDark": "#62482e", "fabric": "#3b6250",
+    "leather": "#a0714f", "stone": "#53615a", "ivory": "#e3e7d7",
+    "brass": "#a79670", "glow": "#b7d1b8", "amber": "#e7c38f",
+    "leaf": "#425b39", "leafDark": "#293f2d", "grille": "#344039",
+    "rubber": "#101812", "lens": "#243b37", "diffuser": "#e4e2d7", "screen": "#233d30"
+  },
+  "zones": {
+    "recording": {"center": [-9,5,0.18], "stage": [7,7], "tableRadius": 1.10, "chairDistance": 1.52},
+    "technology": {"center": [9,5,0.18]},
+    "lounge": {"center": [9,-4.4,0]},
+    "gallery": {"center": [-9,-3.6,0]},
+    "identity": {"center": [0,1.2,0]}
+  }
+}

@@ -1,0 +1,4 @@
+import {chromium} from '@playwright/test';
+import {mkdir} from 'node:fs/promises';
+const b=await chromium.launch({channel:'chrome',headless:true});await mkdir('artifacts/native/scroll',{recursive:true});
+try{const p=await b.newPage({viewport:{width:1000,height:700},reducedMotion:'reduce'});p.on('pageerror',e=>console.log(e.message));await p.goto('http://localhost:5173/');await p.waitForSelector('.loading.done',{state:'attached',timeout:90000});for(let v=0;v<=12;v+=.5){await p.evaluate(v=>scrollTo(0,innerHeight*v),v);await p.waitForTimeout(180);await p.screenshot({path:`artifacts/native/scroll/${String(v*2).padStart(2,'0')}.png`});}console.log(await p.evaluate(()=>({scrollbar:getComputedStyle(document.documentElement).scrollbarWidth,scrollY,canvas:document.querySelectorAll('#world canvas').length})));}finally{await b.close();}

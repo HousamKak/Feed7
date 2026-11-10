@@ -1,0 +1,28 @@
+{
+  "format": "blockforge-world-project/1",
+  "id": "feed7-studio",
+  "entry": "worlds/main.world.json",
+  "space": {
+    "frame": "bf-grid-z-up/1",
+    "lengthUnit": "m"
+  },
+  "targets": {
+    "web": {
+      "backend": "hybrid/1",
+      "cellSize": 0.1,
+      "samplingStep": 0.05,
+      "meshes": [
+        "*"
+      ],
+      "meshCollision": "none",
+      "mode": "final"
+    }
+  },
+  "limits": {
+    "maxTriangles": 3000000,
+    "maxCells": 1000000
+  },
+  "apply": {
+    "target": "web"
+  }
+}

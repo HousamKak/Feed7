@@ -1,0 +1,31 @@
+import {K,P,box,face} from './context.mjs';
+import {build as crystalSeven,buildOrb} from '../objects/seven/index.mjs';
+import {buildLogo} from '../objects/logo/index.mjs';
+import {readFile} from 'node:fs/promises';
+export async function buildArchitecture(ctx){
+ ctx.nodes('identity/opening-logo',await buildLogo(),[0,0,0],0,{sequenceOnly:'logo',production:'Original brand silhouette cut as ivory crystal'});
+ const floor=JSON.parse(await readFile(new URL('../bakes/engraved-floor.mesh.json',import.meta.url),'utf8'));
+ ctx.nodes('architecture/floor',[{mats:[{...floor,material:'stone',spec:{baseColor:P.stone}}]}],[0,0,0],0,{scan:'stone',alwaysVisible:true,production:'Boolean-cut circuit channels with modeled eased lips'});
+ const walls=ctx.mesh('architecture/walls',{scan:'painted-plaster'});box(walls,[0,10.6,4.1],[29,.35,8.2],P.wall);for(const x of [-14.3,14.3])box(walls,[x,3,3],[.3,15,6],P.wall);
+ const trim=ctx.mesh('architecture/metalwork');
+ for(const x of [-13.8,-4.7,4.7,13.8])box(trim,[x,10.35,4],[.06,.08,7.8],P.brass);
+ for(let i=0;i<11;i++)box(trim,[-13+i*2.6,4,8.6],[.12,13,.3],P.ink);
+ const cove=ctx.mesh('architecture/coves',{emission:1.8});
+ for(const x of [-13.8,-4.7,4.7,13.8])box(cove,[x,10.28,4],[.025,.025,7.6],P.glow);
+ for(let i=0;i<6;i++)box(cove,[-13+i*5.2,4,8.42],[.035,11.8,.02],P.ivory);
+ const slats=ctx.mesh('architecture/rear-slats',{scan:'walnut-natural'});
+ K.slatWall(slats,face(10.38),{s0:-14,s1:14,z0:.1,z1:8,pitch:.35,slat:.09,depth:.12,felt:P.ink,colors:[P.woodDark,P.wood],round:true});
+ const stages=ctx.mesh('architecture/stages');for(const x of [-9,9])box(stages,[x,5,.09],[7,7,.18],P.ink);
+ const stageLight=ctx.mesh('architecture/stage-light',{emission:.75});for(const x of [-9,9])box(stageLight,[x,1.51,.18],[6.9,.025,.02],P.amber);
+ const pedestal=ctx.mesh('identity/pedestal');pedestal.cylinder(4.1,0,.24,128,P.ink,K.translate([0,1.2,0]));pedestal.cylinder(3.85,.24,.39,128,'#096646',K.translate([0,1.2,0]));pedestal.cylinder(3.10,.39,.47,128,P.ink,K.translate([0,1.2,0]));
+ pedestal.cylinder(1.40,.47,.55,96,P.ink,K.translate([.2,1.2,0]));K.ring(pedestal,1.39,.008,.547,P.brass,K.translate([.2,1.2,0]),96,8);
+ const groundRings=ctx.mesh('identity/green-ground-rings',{emission:1.4});K.ring(groundRings,4.06,.025,.25,'#43e7a0',K.translate([0,1.2,0]),160,8);K.ring(groundRings,3.08,.014,.48,'#8ce8b3',K.translate([0,1.2,0]),160,8);
+ const desk=ctx.mesh('identity/reception',{scan:'painted-plaster'});desk.prism(K.arcBand(0,1.2,1.8,2.1,Math.PI*.05,Math.PI*.95,64),.35,1.25,P.wall);desk.prism(K.arcBand(0,1.2,1.78,2.12,Math.PI*.05,Math.PI*.95,64),1.25,1.3,P.woodDark);
+ ctx.nodes('identity/seven',crystalSeven(),[.2,1.2,.55],0,{production:'FEED7 faceted emerald crystal award',motion:{kind:'sway',axis:'y',amplitude:.025,period:22,pivot:[.2,1.2,2.3]}});
+ const orbit=ctx.mesh('identity/orbit',{motion:{kind:'spin',axis:'y',speed:.035,pivot:[0,1.2,6.8]},metalness:.85});
+ K.ring(orbit,4.3,.045,0,P.metal,p=>[p[0],p[1]+1.2,6.8+p[2]+p[0]*.08],160,8);K.ring(orbit,3.8,.018,0,P.glow,p=>[p[0],p[1]+1.2,6.7+p[2]-p[0]*.08],160,8);
+ ctx.nodes('identity/floating-crystal',buildOrb(),[0,1.2,6.8],0,{production:'FEED7 floating faceted emerald',motion:{kind:'spin',axis:'y',speed:.12,bob:.075,bobPeriod:6.5,pivot:[0,1.2,6.8]}});
+ const halo=ctx.mesh('identity/halo',{emission:.95});K.ring(halo,2.28,.023,0,'#53d798',p=>[p[0]+.2,1.65-p[2],p[1]+2.8],160,8);K.ring(pedestal,2.45,.012,0,P.metal,p=>[p[0]+.2,1.68-p[2],p[1]+2.8],160,8);
+ const cables=ctx.mesh('architecture/suspensions');for(const x of [-3.5,3.5])for(const y of [-1,4])cables.tube([[x,y,6.8],[x,y,8.6]],.008,8,P.ink);
+ const brand=ctx.mesh('graphics/wordmark',{graphic:'brand/wordmark.svg',transparent:true});brand.panel([-6.1,9.96,4.0],[6.1,9.96,4.0],[6.1,9.96,7.3],[-6.1,9.96,7.3],P.ivory,[0,-1,0]);
+}

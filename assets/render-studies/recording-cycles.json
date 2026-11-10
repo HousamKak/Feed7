@@ -1,0 +1,35 @@
+{
+  "lod": null,
+  "out": "recording-cycles.png",
+  "view": {
+    "id": "recording",
+    "position": [
+      -5.9,
+      1.8,
+      2.25
+    ],
+    "target": [
+      -10.1,
+      5.4,
+      1.8
+    ],
+    "fov": 44
+  },
+  "light": "studio",
+  "size": [
+    1280,
+    800
+  ],
+  "render": {
+    "samples": 128,
+    "noiseThreshold": 0.025,
+    "timeLimit": 180,
+    "minSamples": 24,
+    "denoise": true
+  },
+  "build_s": 1.2,
+  "render_s": 9.6,
+  "triangles": 75484,
+  "blender": "4.5.9 LTS",
+  "pipeline": "Blockforge tools/render-cycles/run.mjs with Blender Cycles"
+}

@@ -11,7 +11,13 @@
     "studio:export": "node scripts/export-blockforge.mjs",
     "test:browser": "node scripts/browser-qa.mjs",
     "build:pages": "node scripts/build-pages.mjs",
-    "test:pages": "node scripts/pages-qa.mjs"
+    "test:pages": "node scripts/pages-qa.mjs",
+    "native:build": "node blockforge/tools/author-native.mjs && node blockforge/tools/compile-web.mjs",
+    "test:native": "node scripts/native-qa.mjs",
+    "native:world": "node blockforge/tools/build-world.mjs",
+    "test:native-world": "node scripts/native-world-qa.mjs",
+    "native:save": "node blockforge/tools/save-world.mjs",
+    "test:native-models": "node scripts/review-native-models.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",

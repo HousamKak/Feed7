@@ -63,6 +63,10 @@ The client portal intentionally provides request tracking now; invoicing, file c
 
 ## Blockforge authoring
 
+The local studio now uses the native world codebase in [blockforge/README.md](blockforge/README.md). Its room and asset modules generate typed world source and mesh assets, compile through Blockforge worldc, and deliver the validated artifact to the browser. Run `npm run native:build`, `npm run native:world`, then `npm run native:save` to regenerate it. Production furniture and planting reuse the existing local engine modules. The generated private preview assets are not published. The introductory logo/circuit effects still use their existing browser animation module; final visual refinement and Cycles delivery remain in progress.
+
+The following export command is retained for the earlier prototype only:
+
 Import `studio/feed7.save.json` into Blockforge to work with the studio geometry. To regenerate from the web scene, keep `npm run dev` running, set `BLOCKFORGE_ROOT` to your Blockforge checkout (defaults to `D:/dev/block game`), and run `npm run studio:export`. If Playwright's default browser is not installed, set `CHROME_EXECUTABLE` to an existing Chromium/Chrome binary. The exporter writes only inside this project's `studio/` directory; it does not alter the Blockforge checkout. The export is one-way: native edits are not automatically reflected back into the website's procedural source.
 
 ## Current visual revision
@@ -72,3 +76,9 @@ The supplied `logo1.jpg` and `logo2.jpg` are preserved in `assets/brand-source/`
 `public/blockforge/` contains four verified CC0 material scans and a studio HDRI, imported through Blockforge's real material compiler by `scripts/import-blockforge-materials.mjs`. The materials manifest records source licences, URLs, and hashes. The interactive site remains a Three.js render. This material and lighting revision is not a finished photoreal or path-traced result.
 
 The native snapshot in `studio/` is the earlier nine-stop export; it is retained as a verified baseline while the new sequence and photoreal pipeline are developed.
+
+## Offline Cycles reference
+
+A real Blockforge/Blender Cycles reference is saved in `assets/render-studies/recording-cycles.png` and published as `public/render-studies/recording-cycles.webp`. Its metadata records 128 samples at 1280 by 800 and a 9.6-second GPU render. The in-house work gallery includes this lighting study. It uses the studio geometry, scanned materials, soft area lights, HDRI, indirect light, and denoising. It is separate from interactive rendering, and the simplified furniture and equipment still need more modelling detail.
+
+With the local Blockforge checkout and development server running, set `CHROME_EXECUTABLE` and run `node scripts/render-photoreal.mjs`. This exports the current web scene into Blockforge's Cycles scene format and invokes `tools/render-cycles/run.mjs`. The normal command respects the engine's render queue. The optional `--no-slot` flag bypasses its admission gate when explicitly requested, as it was for this reference.

@@ -1,0 +1,100 @@
+{
+  "format": "feed7-cloth-bakes/1",
+  "solver": "Blockforge dress._cloth_pillow",
+  "helperSha256": "68a1b3852d33cc2e47550a16006c5c2b1a4a80237f957377b5e5c2a0093a6f42",
+  "blender": "4.5.9 LTS",
+  "items": [
+    {
+      "id": "chair-seat",
+      "size": [
+        0.62,
+        0.59,
+        0.115
+      ],
+      "seed": 701,
+      "center": [
+        0,
+        -0.025,
+        0.4925
+      ],
+      "group": "seat",
+      "material": "velvet",
+      "frames": 36,
+      "cuts": 30,
+      "pressure": 4.5,
+      "foamRestrained": true,
+      "fitVersion": "foam-restrained/1",
+      "triangles": 46128,
+      "sha256": "e20ac2127f6ca6ffcb2ee5b2f7fe7ce99edff39bbdabc8b26edd4c0bc70fe5d5"
+    },
+    {
+      "id": "sofa-seat",
+      "size": [
+        0.81,
+        0.77,
+        0.16
+      ],
+      "seed": 702,
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "group": "cushions",
+      "material": "leather",
+      "frames": 36,
+      "cuts": 30,
+      "pressure": 4.5,
+      "foamRestrained": true,
+      "fitVersion": "foam-restrained/1",
+      "triangles": 46128,
+      "sha256": "d9b7c5cab8463eccd2842602d34d8f97168b114df0c25a9f79eee8b0680d92de"
+    },
+    {
+      "id": "sofa-back",
+      "size": [
+        0.79,
+        0.58,
+        0.13
+      ],
+      "seed": 703,
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "group": "cushions",
+      "material": "leather",
+      "frames": 36,
+      "cuts": 30,
+      "pressure": 4.5,
+      "foamRestrained": true,
+      "fitVersion": "foam-restrained/1",
+      "triangles": 46128,
+      "sha256": "beff6b31a87db678a23dd9819c9403e1686cb5ce6de7f07de180d45a2a02b2fc"
+    },
+    {
+      "id": "throw",
+      "size": [
+        0.44,
+        0.44,
+        0.075
+      ],
+      "seed": 704,
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "group": "pillows",
+      "material": "linen",
+      "frames": 36,
+      "cuts": 30,
+      "pressure": 4.5,
+      "foamRestrained": false,
+      "fitVersion": "foam-restrained/1",
+      "triangles": 46128,
+      "sha256": "7c58611a48f863e5604c6111c95590e7bc7fb7f5a83cbeb24903e18bd5340565"
+    }
+  ]
+}

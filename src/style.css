@@ -62,3 +62,11 @@ dialog:before{content:'';position:absolute;inset:0;pointer-events:none;backgroun
 dialog input,dialog select,dialog textarea{background:#03170ed6;border-color:#89bd9b42}
 dialog .success-card,dialog .record-form{background:#082b1ca6;border-color:#86cda54d}
 @media(max-width:760px){dialog{background:linear-gradient(135deg,#123b2be6,#061e16eb);backdrop-filter:blur(22px) saturate(125%);-webkit-backdrop-filter:blur(22px) saturate(125%)}.cinematic-copy{bottom:17%}}
+
+.model-review{overflow:hidden}.model-review #world{pointer-events:auto}.model-review header,.model-review main,.model-review .world-shade,.model-review .grain,.model-review .tour-footer,.model-review .tour-progress{display:none}
+.model-toolbar{position:fixed;z-index:20;top:20px;left:20px;color:#e9f3e9;background:#10251deb;backdrop-filter:blur(12px);border:1px solid #9cc4a855;padding:18px 22px;max-width:calc(100vw - 40px);border-radius:8px;font-size:12px}.model-toolbar strong{font-size:15px;display:block;margin-bottom:12px}.model-toolbar nav,.model-toolbar>div{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.model-toolbar a,.model-toolbar button{padding:7px 10px;border:1px solid #9cc4a855;border-radius:4px;color:#d8eddd}.model-toolbar small{color:#93b39d;font-size:10px}
+
+.model-review .loading{display:none}
+/* Keep the cinematic canvas edge clear without disabling wheel, touch or keys. */
+html,body{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}

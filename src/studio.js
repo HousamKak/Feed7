@@ -13,10 +13,14 @@ import {FXAAShader} from 'three/addons/shaders/FXAAShader.js';
 import {cameraStops} from './camera-tour.js';
 import {loadBlockforgeMaterials} from './blockforge-materials.js';
 import {createBrandSequence,smooth} from './brand-sequence.js';
+import {createMicrophone,createSofa,createPlant,createTable,createCamera,createSoftbox} from './studio-models.js';
+import {loadNativeChair} from './native-models.js';
 
 // FEED7's art-directed studio. Metres, Y up. Camera stops live with the scene,
 // independently of the editorial overlays so the world remains easy to extend.
 export async function createStudio(container, onReady) {
+ if(new URLSearchParams(location.search).has('model')){const {createModelReview}=await import('./model-review.js');return createModelReview(container,onReady);}
+ if(!new URLSearchParams(location.search).has('prototype')){const {createNativeStudio}=await import('./native-studio.js');return createNativeStudio(container,onReady);}
  let dirty=true;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const mobile=innerWidth<760;
@@ -55,6 +59,7 @@ export async function createStudio(container, onReady) {
   glass:new THREE.MeshPhysicalMaterial({color:'#65d8ad',transparent:true,opacity:.17,roughness:.12,metalness:.4,side:THREE.DoubleSide,depthWrite:false}),
   leaf:new THREE.MeshStandardMaterial({color:'#23794c',roughness:.6,side:THREE.DoubleSide})
  };
+ Object.assign(mats,{seam:new THREE.MeshStandardMaterial({color:'#1b2922',roughness:.9}),grille:new THREE.MeshStandardMaterial({color:'#303633',roughness:.58,metalness:.7}),cable:new THREE.MeshStandardMaterial({color:'#111713',roughness:.86}),soil:new THREE.MeshStandardMaterial({color:'#221c14',roughness:1}),vein:new THREE.MeshStandardMaterial({color:'#526347',roughness:.85}),leafLight:new THREE.MeshStandardMaterial({color:'#3e5730',roughness:.64,side:THREE.DoubleSide})});mats.leaf.color.set('#254429');mats.lens=new THREE.MeshPhysicalMaterial({color:'#132724',roughness:.08,metalness:.5,clearcoat:1});mats.record=new THREE.MeshBasicMaterial({color:'#cc4938'});mats.diffuser=new THREE.MeshStandardMaterial({color:'#eeeadd',roughness:.9,emissive:'#e4dfd0',emissiveIntensity:.25});
  const textureLoader=new THREE.TextureLoader();
  const [stone,fabric,art,production]=await Promise.all(['basalt-floor','emerald-acoustic','emerald-signal','production-detail'].map(name=>textureLoader.loadAsync(assetUrl(`generated/${name}.webp`))));
  for(const t of [stone,fabric,art,production]){t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());}
@@ -142,17 +147,22 @@ export async function createStudio(container, onReady) {
  sign('01 / CREATIVE FLOOR',-9,4.55,-9.98,6.3,.8,{size:95});
  framedImage(production,-9,6.4,-9.98,6.6,2.7);
  const soundBars=[];for(let i=0;i<25;i++){const bar=mesh(new THREE.BoxGeometry(.115,1,.08),mats.amber,-12+i*.25,1.7,-8.3);bar.scale.y=.25;bar.userData.dynamic=true;soundBars.push(bar);}
- mesh(new THREE.LatheGeometry([[0,-.07],[1.58,-.07],[1.63,-.04],[1.65,-.01],[1.65,.025],[1.63,.06],[1.58,.07],[0,.07]].map(p=>new THREE.Vector2(...p)),96),mats.wood,-9,1.1,-5);cyl(-9,.73,-5,.28,.65,mats.ink);cyl(-9,.4,-5,.6,.06,mats.ink);
- function chair(x,z,angle=0,mat=mats.fabric){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=angle;
-  const seat=new THREE.Mesh(new RoundedBoxGeometry(.85,.2,.82,3,.08),mat);seat.position.y=.85;seat.castShadow=true;seat.receiveShadow=true;g.add(seat);
-  const back=new THREE.Mesh(new RoundedBoxGeometry(.85,.85,.2,3,.08),mat);back.position.set(0,1.28,.39);back.rotation.x=-.12;back.castShadow=true;g.add(back);
-  for(const dx of [-.31,.31])for(const dz of [-.28,.28]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.8,8),mats.metal);leg.position.set(dx,.4,dz);g.add(leg);}world.add(g);
- }
+ const recordingTable=createTable(mats);recordingTable.position.set(-9,.355,-5);world.add(recordingTable);
+
+ const nativeChair=await loadNativeChair(mats);
+ function chair(x,z,angle=0,mat=mats.fabric){const g=nativeChair(mat);const base=z< -1.5?(x< -5?.355:.31):0;g.position.set(x,base,z);g.rotation.y=angle;world.add(g);return g;}
+
  chair(-11.05,-5,-Math.PI/2,mats.leather);chair(-6.95,-5,Math.PI/2,mats.leather);chair(-9,-7.05,Math.PI);chair(-9,-2.95,0);
- for(const x of [-9.8,-8.2]){cyl(x,1.22,-5,.14,.035,mats.ink);line([x,1.23,-5],[x,1.65,-4.75],.025);line([x,1.65,-4.75],[x+.2,1.55,-4.4],.025);mesh(new THREE.CapsuleGeometry(.065,.22,4,8),mats.ink,x+.2,1.55,-4.4,Math.PI/3);}
- function tripod(x,z,softbox=false){line([x,0,z],[x,2.3,z],.025);for(let a=0;a<3;a++){let t=a*Math.PI*2/3;line([x,.65,z],[x+Math.cos(t)*.6,0,z+Math.sin(t)*.6],.018);}
-  if(softbox){mesh(new THREE.CylinderGeometry(.65,.32,.28,8),mats.ink,x,2.55,z,Math.PI/2,0,-.3);mesh(new THREE.CircleGeometry(.62,8),mats.light,x,2.55,z+.15,0,0,-.3);}else{box(x,2.22,z,.5,.35,.7,mats.ink);mesh(new THREE.CylinderGeometry(.15,.15,.28,24),mats.metal,x,2.22,z+.42,Math.PI/2);}}
+ for(const [x,yaw]of [[-9.8,-.45],[-8.2,.45]]){const mic=createMicrophone(mats);mic.position.set(x,1.165,-5);mic.rotation.y=yaw;world.add(mic);}
+ function tripod(x,z,softbox=false){
+  const base=.355,height=softbox?2.0:1.75;
+  line([x,base,z],[x,base+height,z],.024,mats.ink);
+  for(let a=0;a<3;a++){const t=a*Math.PI*2/3,fx=x+Math.cos(t)*.6,fz=z+Math.sin(t)*.6;line([x,base+.7,z],[fx,base+.025,fz],.018,mats.metal);cyl(fx,base+.018,fz,.028,.035,mats.cable);}
+  for(const y of [.65,1.15,1.55]){cyl(x,base+y,z,.034,.045,mats.ink);rounded(x+.04,base+y,z,.07,.025,.025,mats.cable,.005);}
+  const gear=softbox?createSoftbox(mats):createCamera(mats);gear.position.set(x,base+height+(softbox?.25:.125),z);world.add(gear);
+ }
  tripod(-12,-2);tripod(-6,-6,true);tripod(-11.9,-6.3,true);
+
  for(let i=0;i<3;i++){box(-10.8+i*1.7,5.8,-5,1.4,.13,2.8,mats.fabric);line([-10.8+i*1.7,5.8,-5],[-10.8+i*1.7,8,-5],.012);}
  // Digital lab: glass fins, workstation and live generative screens.
  sign('02 / DIGITAL LAB',9,7.65,-9.98,6.3,.7,{size:100});
@@ -175,15 +185,12 @@ export async function createStudio(container, onReady) {
  // Growth wall has a live graph, independent from all business claims.
  screen(0,3.05,-9.7,5.7,2.5,'growth');
  // Lounge and strategy area with sculptural furniture.
- box(8,.2,3.8,7,.12,4,mats.rug);
- rounded(9.4,.65,4.4,3.8,.65,1.15,mats.fabric);rounded(9.4,1.15,4.88,3.8,.9,.3,mats.fabric);
- rounded(7.45,1,4.4,.3,.9,1.2,mats.green);rounded(11.35,1,4.4,.3,.9,1.2,mats.green);
- for(let i=0;i<3;i++){rounded(8.15+i*1.24,1,4.35,1.18,.22,.95,mats.fabric,.1);const cushion=rounded(8.15+i*1.24,1.36,4.65,1.12,.66,.23,mats.fabric,.1);cushion.rotation.x=-.12;}
- for(const x of [7.8,11])for(const z of [4,4.8])cyl(x,.3,z,.045,.4,mats.metal);
- const pillow=rounded(7.95,1.38,4.35,.55,.55,.22,mats.leather,.1);pillow.rotation.set(-.12,.1,-.16);
- rounded(9.15,.735,2.8,.52,.045,.37,mats.ink,.015);rounded(9.13,.77,2.78,.45,.025,.32,mats.white,.008);
- cyl(9,.66,2.7,1.05,.1,mats.white);cyl(9,.4,2.7,.36,.5,mats.metal);
- cyl(9,.76,2.7,.18,.17,mats.green);plant(9,.85,2.7,.35);
+ box(8,.013,3.8,7,.018,4,mats.rug);
+ const sofa=createSofa(mats);sofa.position.set(9.4,.025,4.4);world.add(sofa);
+
+ rounded(9.45,.5025,2.8,.52,.045,.37,mats.ink,.015);rounded(9.43,.5375,2.78,.45,.025,.32,mats.white,.008);
+ cyl(9,.44,2.7,1.05,.08,mats.white);cyl(9,.22,2.7,.36,.36,mats.metal);cyl(9,.035,2.7,.6,.025,mats.metal);
+ plant(8.7,.48,2.65,.24);mesh(new THREE.LatheGeometry([[0,0],[.045,0],[.05,.008],[.055,.085],[.052,.09],[.046,.085],[.041,.015],[0,.015]].map(p=>new THREE.Vector2(...p)),40),mats.white,9.05,.48,2.4);ring(9.115,.525,2.4,.034,.006,mats.white,0);
  chair(6.2,2.7,-Math.PI/2,mats.leather);
  // A kinetic gallery occupies the open foreground. Repeated chrome ribbons
  // are instanced: eleven independently moving forms, a single draw call.
@@ -205,22 +212,7 @@ export async function createStudio(container, onReady) {
  line([9,5.4,3.8],[9,8.4,3.8],.008);
  // Plants break up the hard architecture with generous silhouettes.
  // Curved, pointed leaves and branching stems give the plants an organic silhouette.
- function plant(x,y,z,s=1){
-  cyl(x,y+.3*s,z,.3*s,.6*s,mats.ink,.37*s);cyl(x,y+.59*s,z,.32*s,.025*s,mats.wood);
-  line([x,y+.6*s,z],[x+.08*s,y+2.8*s,z],.025*s,mats.wood);
-  for(let i=0;i<24;i++){
-   const a=i*2.399,ly=y+(.85+i*.075)*s,spread=(.35+Math.sin(i*1.7)*.12)*s;
-   const lx=x+Math.cos(a)*spread,lz=z+Math.sin(a)*spread;
-   line([x,ly-.16*s,z],[lx,ly,lz],.009*s,mats.wood);
-   const positions=[],indices=[],uvs=[];
-   for(let j=0;j<=8;j++){const t=j/8,width=Math.pow(Math.sin(t*Math.PI),.85)*.19;
-    for(let k=0;k<3;k++){const side=k-1;positions.push(side*width,t*.67,Math.sin(t*Math.PI)*.11-Math.abs(side)*width*.3);uvs.push(k/2,t);}
-   }
-   for(let j=0;j<8;j++)for(let k=0;k<2;k++){const n=j*3+k;indices.push(n,n+3,n+1,n+1,n+3,n+4);}
-   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geo.setIndex(indices);geo.computeVertexNormals();
-   const leaf=mesh(geo,mats.leaf,lx,ly,lz,.55+Math.sin(i)*.28,a,.55);leaf.scale.setScalar(s*(.8+.25*Math.sin(i*3)));
-  }
- }
+ function plant(x,y,z,s=1){const p=createPlant(mats,{scale:s});p.position.set(x,y,z);world.add(p);return p;}
 
  plant(-13,0,-8,1.25);plant(12,0,-9,1.2);plant(-5,0,-8,1);plant(13,0,1,1.2);plant(-12,0,3,1.25);
  // Foreground columns and wayfinding provide parallax during entry.
@@ -235,7 +227,7 @@ export async function createStudio(container, onReady) {
  scene.updateMatrixWorld(true);
  // Use the engine's physical tile size in metres, rather than stretching a
  // scan once over an entire wall, chair, or tabletop.
- world.traverse(o=>{const tile=o.material?.userData?.tileMeters;if(!o.isMesh||!tile)return;const pos=o.geometry.attributes.position,norm=o.geometry.attributes.normal,uv=new Float32Array(pos.count*2),v=new THREE.Vector3(),n=new THREE.Vector3(),nm=new THREE.Matrix3().getNormalMatrix(o.matrixWorld);for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld);n.fromBufferAttribute(norm,i).applyMatrix3(nm);const ax=Math.abs(n.x),ay=Math.abs(n.y),az=Math.abs(n.z);uv[i*2]=(ax>ay&&ax>az?v.z:v.x)/tile;uv[i*2+1]=(ay>ax&&ay>az?v.z:v.y)/tile;}o.geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));});
+ world.traverse(o=>{const tile=o.material?.userData?.tileMeters;if(!o.isMesh||!tile||o.geometry.userData.nativePatternUvs)return;const pos=o.geometry.attributes.position,norm=o.geometry.attributes.normal,uv=new Float32Array(pos.count*2),v=new THREE.Vector3(),n=new THREE.Vector3(),nm=new THREE.Matrix3().getNormalMatrix(o.matrixWorld);for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld);n.fromBufferAttribute(norm,i).applyMatrix3(nm);const ax=Math.abs(n.x),ay=Math.abs(n.y),az=Math.abs(n.z);uv[i*2]=(ax>ay&&ax>az?v.z:v.x)/tile;uv[i*2+1]=(ay>ax&&ay>az?v.z:v.y)/tile;}o.geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));});
  const staticGroups=new Map();world.traverse(o=>{if(!o.isMesh||o.isReflector||o.material.transparent)return;for(let p=o;p&&p!==scene;p=p.parent)if(p.userData.dynamic)return;const key=o.material.uuid+o.castShadow+o.receiveShadow;if(!staticGroups.has(key))staticGroups.set(key,[]);staticGroups.get(key).push(o);});
  let batchedMeshes=0;for(const objects of staticGroups.values()){if(objects.length<2)continue;const geometries=objects.map(o=>{let g=o.geometry.clone();if(g.index){const expanded=g.toNonIndexed();g.dispose();g=expanded;}g.applyMatrix4(o.matrixWorld);return g;});const combined=mergeGeometries(geometries);if(combined){const o=new THREE.Mesh(combined,objects[0].material);o.castShadow=objects[0].castShadow;o.receiveShadow=objects[0].receiveShadow;world.add(o);for(const old of objects){old.removeFromParent();old.geometry.dispose();}batchedMeshes+=objects.length-1;}geometries.forEach(g=>g.dispose());}
  world.traverse(o=>{if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material]){m.clippingPlanes=[assemblyPlane];m.clipShadows=false;}});
@@ -250,7 +242,7 @@ export async function createStudio(container, onReady) {
  route.splice(8,0,{at:7.5,p:[1,3.7,5.8],t:[2,2,-4],fov:49});
  const path=new THREE.CatmullRomCurve3(route.map(s=>new THREE.Vector3(...s.p)),false,'catmullrom',.15);
  const gaze=new THREE.CatmullRomCurve3(route.map(s=>new THREE.Vector3(...s.t)),false,'catmullrom',.15);
- if(import.meta.env.DEV&&new URLSearchParams(location.search).has('authoring')){const {exportBlockforge}=await import('./blockforge-export.js');window.__FEED7_AUTHORING__={exportPlan:()=>{const y=world.position.y;world.position.y=0;const plan=exportBlockforge(world,stops);world.position.y=y;return plan;}};}
+ if(import.meta.env.DEV&&new URLSearchParams(location.search).has('authoring')){const {exportBlockforge}=await import('./blockforge-export.js');const {exportCycles}=await import('./cycles-export.js');window.__FEED7_AUTHORING__={exportCycles:()=>{const y=world.position.y;world.position.y=0;const data=exportCycles(world);world.position.y=y;return data;},exportPlan:()=>{const y=world.position.y;world.position.y=0;const plan=exportBlockforge(world,stops);world.position.y=y;return plan;}};}
  let progress=0,current=0,last=0,paused=false,frame=0,active=true,exploring=false,lastScreen=0,slowFrames=0,frameCount=0,suspended=false,motionTime=0,shadowReady=false,fastFrames=0;
  const look=new THREE.Vector3(),point=new THREE.Vector3();
  let pointer={x:0,y:0};const onPointer=e=>{pointer.x=(e.clientX/innerWidth-.5);pointer.y=(e.clientY/innerHeight-.5);};window.addEventListener('pointermove',onPointer,{passive:true});

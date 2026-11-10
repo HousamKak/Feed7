@@ -7,3 +7,17 @@ artifacts/
 dist-pages/
 prompt.txt
 photo_*.jpg
+# Local preview derived from the private production furniture dependency.
+public/native/chair.json
+blockforge/objects/chair/chair.object.json
+blockforge/objects/chair/production-*.json
+blockforge/build-report.json
+blockforge/assets/
+blockforge/worlds/
+blockforge/world-build-report.json
+public/native/studio.json
+public/native/studio*.json.gz
+public/native/*.next
+public/native/bootstrap.json
+public/native/revision.json
+blockforge/objects/sofa/sofa.object.json
