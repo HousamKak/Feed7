@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { randomBytes, randomUUID, createHash, timingSafeEqual } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { services,chapters,faqs } from '../src/content.js';
+import { services,chapters,faqs,CONTENT_VERSION } from '../src/content.js';
 
 const hash=v=>createHash('sha256').update(v).digest('hex');
 const statuses=['New','Reviewing','In discussion','In progress','Completed','Closed'];
@@ -19,6 +19,9 @@ export function createApp({dbPath='data/feed7.sqlite',adminPassword=process.env.
  CREATE TABLE IF NOT EXISTS sessions(tokenHash TEXT PRIMARY KEY,expires INTEGER NOT NULL);
  CREATE TABLE IF NOT EXISTS content(key TEXT PRIMARY KEY,value TEXT NOT NULL);`);
  const seed=db.prepare('INSERT OR IGNORE INTO content(key,value) VALUES(?,?)');for(const [k,v]of Object.entries({services,chapters,faqs}))seed.run(k,JSON.stringify(v));
+ // A new source copy revision replaces stored copy once. Admin edits made
+ // after that point are kept until CONTENT_VERSION changes again.
+ if(db.prepare("SELECT value FROM content WHERE key='version'").get()?.value!==CONTENT_VERSION){const put=db.prepare('INSERT INTO content(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');for(const [k,v]of Object.entries({services,chapters,faqs}))put.run(k,JSON.stringify(v));put.run('version',CONTENT_VERSION);}
  const getContent=k=>JSON.parse(db.prepare('SELECT value FROM content WHERE key=?').get(k).value);
  // Add new authored camera stops without discarding existing editorial edits.
  const savedChapters=getContent('chapters');
